@@ -124,7 +124,7 @@ export default function Home() {
                  <Zap size={20} color="var(--accent)" />
                  <span style={{ fontWeight: 600 }}>AI 사운드스케이프</span>
               </div>
-              <p style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>오늘의 피로도를 분석한 결과, '깊은 숲속 장작 소리'를 추천합니다.</p>
+              <p style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>오늘의 피로도를 분석한 결과, &apos;깊은 숲속 장작 소리&apos;를 추천합니다.</p>
               <button className="btn btn-secondary" style={{ padding: '8px', fontSize: '0.8rem' }}>재생하기</button>
             </div>
           </div>
