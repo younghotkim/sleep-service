@@ -1,9 +1,26 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { Coffee, Activity, Moon, Clock, ChevronRight, Zap, Target, Star } from 'lucide-react';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Coffee, Activity, Moon, Clock, ChevronRight, Zap, Target, Star, Coins, CheckCircle2 } from 'lucide-react';
+import { INITIAL_REWARD_STATE } from '@/lib/rewards';
 
 export default function Home() {
+  const [points, setPoints] = useState(INITIAL_REWARD_STATE.points);
+  const [rewardClaimed, setRewardClaimed] = useState(false);
+  const [showClaimAnimation, setShowClaimAnimation] = useState(false);
+
+  const handleClaimReward = () => {
+    if (!rewardClaimed) {
+      setShowClaimAnimation(true);
+      setTimeout(() => {
+        setPoints(p => p + 120);
+        setRewardClaimed(true);
+        setShowClaimAnimation(false);
+      }, 1500);
+    }
+  };
+
   const containerVariants = {
     hidden: { opacity: 0 },
     show: {
@@ -21,10 +38,16 @@ export default function Home() {
 
   return (
     <motion.div variants={containerVariants} initial="hidden" animate="show">
-      <header style={{ marginBottom: '40px' }}>
-        <p className="subtitle" style={{ marginBottom: '8px' }}>2026년 3월 24일 (화)</p>
-        <h1 className="gradient-text">안녕하세요, 슬립튜너님! 👋</h1>
-        <p style={{ color: 'var(--muted)' }}>어젯밤 수면 점수는 우수합니다. 오늘 하루도 개운하게 시작해볼까요?</p>
+      <header style={{ marginBottom: '40px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+        <div>
+          <p className="subtitle" style={{ marginBottom: '8px' }}>2026년 3월 24일 (화)</p>
+          <h1 className="gradient-text">안녕하세요, 슬립튜너님! 👋</h1>
+          <p style={{ color: 'var(--muted)' }}>어젯밤 수면 점수는 우수합니다. 오늘 하루도 개운하게 시작해볼까요?</p>
+        </div>
+        <div className="glass" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', background: 'rgba(255, 215, 0, 0.1)', border: '1px solid rgba(255, 215, 0, 0.2)' }}>
+          <Coins size={18} color="#FFD700" />
+          <span style={{ fontWeight: 700, fontSize: '1.1rem' }}>{points.toLocaleString()} P</span>
+        </div>
       </header>
 
       <section className="dashboard-grid">
@@ -64,16 +87,53 @@ export default function Home() {
           </div>
         </motion.div>
 
-        <motion.div variants={itemVariants} className="glass-card" style={{ background: 'linear-gradient(135deg, rgba(123, 97, 255, 0.1), rgba(0, 209, 255, 0.05))' }}>
+        <motion.div variants={itemVariants} className="glass-card" style={{ position: 'relative', background: 'linear-gradient(135deg, rgba(123, 97, 255, 0.1), rgba(0, 209, 255, 0.05))', overflow: 'hidden' }}>
           <h2>Sleep-to-Earn</h2>
           <div style={{ textAlign: 'center', padding: '10px 0' }}>
-            <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ repeat: Infinity, duration: 2 }}>
-               <Star size={48} fill="var(--secondary)" color="var(--secondary)" />
+            <motion.div 
+              animate={showClaimAnimation ? { 
+                scale: [1, 1.5, 0],
+                opacity: [1, 1, 0],
+                y: [0, -20, -50]
+              } : (rewardClaimed ? { scale: 1 } : { scale: [1, 1.1, 1] })} 
+              transition={{ repeat: rewardClaimed || showClaimAnimation ? 0 : Infinity, duration: 2 }}
+            >
+               <Star size={48} fill={rewardClaimed ? "var(--muted)" : "var(--secondary)"} color={rewardClaimed ? "var(--muted)" : "var(--secondary)"} />
             </motion.div>
-            <p style={{ fontSize: '1.5rem', fontWeight: 700, margin: '16px 0 4px' }}>+120 Point</p>
-            <p style={{ fontSize: '0.8rem', color: 'var(--muted)' }}>어젯밤 목표 수면 시간 준수!</p>
+            
+            <AnimatePresence>
+              {showClaimAnimation && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: 1, scale: 1.2 }}
+                  exit={{ opacity: 0, scale: 2 }}
+                  style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 10 }}
+                >
+                  <span style={{ fontSize: '2rem', fontWeight: 800, color: '#FFD700' }}>+120 P</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <p style={{ fontSize: '1.5rem', fontWeight: 700, margin: '16px 0 4px', color: rewardClaimed ? 'var(--muted)' : 'inherit' }}>
+              {rewardClaimed ? '+0 Point' : '+120 Point'}
+            </p>
+            <p style={{ fontSize: '0.8rem', color: 'var(--muted)' }}>
+              {rewardClaimed ? '오늘의 보상을 모두 받았습니다.' : '어젯밤 목표 수면 시간 준수!'}
+            </p>
           </div>
-          <button className="btn btn-primary" style={{ width: '100%', marginTop: '20px' }}>보상 받기</button>
+          <button 
+            onClick={handleClaimReward}
+            disabled={rewardClaimed || showClaimAnimation}
+            className={rewardClaimed ? "btn btn-secondary" : "btn btn-primary"} 
+            style={{ width: '100%', marginTop: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+          >
+            {rewardClaimed ? (
+              <>
+                <CheckCircle2 size={18} />
+                수령 완료
+              </>
+            ) : '보상 받기'}
+          </button>
         </motion.div>
 
         <motion.div variants={itemVariants} className="glass-card">
