@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Moon, LineChart, Gift, Settings, Sparkles, User } from 'lucide-react';
+import { Home, Moon, LineChart, Gift, Settings, Sparkles, User, Activity } from 'lucide-react';
 
 const Sidebar = () => {
   const pathname = usePathname();
@@ -10,6 +10,7 @@ const Sidebar = () => {
   const menuItems = [
     { title: '대시보드', icon: Home, path: '/' },
     { title: '수면 데이터', icon: LineChart, path: '/tracking' },
+    { title: '실시간 트래킹', icon: Activity, path: '/tracking/live' },
     { title: '회복 솔루션', icon: Sparkles, path: '/recommendation' },
     { title: '디지털 펫', icon: Moon, path: '/pet' },
     { title: '커뮤니티', icon: User, path: '/community' },
