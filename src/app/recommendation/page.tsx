@@ -1,12 +1,20 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Play, Pause, FastForward, Rewind, Music, Volume2, Moon, Clock, BookOpen, Coffee, Zap, Stethoscope, Sun } from 'lucide-react';
-import { useState } from 'react';
+import { Clock, BookOpen, Coffee, Zap, Stethoscope, Sun } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import SoundPlayer from '@/components/SoundPlayer';
+import { getTonightRecommendations, soundscapes, Soundscape } from '@/utils/recommendationEngine';
 
 export default function Recommendation() {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [volume, setVolume] = useState(65);
+  const [currentTrack, setCurrentTrack] = useState<Soundscape>(soundscapes[0]);
+  const [recommendations, setRecommendations] = useState<any>(null);
+
+  useEffect(() => {
+    const recs = getTonightRecommendations();
+    setRecommendations(recs);
+    setCurrentTrack(recs.soundscapeRecommendation.sound);
+  }, []);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -21,88 +29,24 @@ export default function Recommendation() {
     show: { opacity: 1, scale: 1 }
   };
 
-  const soundscapes = [
-    { title: '깊은 숲속의 장작', duration: '무한 재생', type: 'ASMR' },
-    { title: '우주 정거장의 백색소음', duration: '무한 재생', type: 'White Noise' },
-    { title: '봄비 내리는 창가', duration: '무한 재생', type: 'Nature' },
-    { title: '알파파 유도 비트', duration: '30분', type: 'Binaural Beats' },
-  ];
+  if (!recommendations) return null; // or a loader
 
   return (
     <motion.div variants={containerVariants} initial="hidden" animate="show">
       <header style={{ marginBottom: '40px' }}>
         <h1 className="gradient-text">맞춤형 회복 솔루션</h1>
         <p style={{ color: 'var(--muted)' }}>유저님의 오늘의 상태와 수면 데이터에 최적화된 리드미컬 케어를 제안합니다.</p>
+        <p style={{ color: 'var(--accent)', marginTop: '8px', fontSize: '0.9rem' }}>
+           💡 {recommendations.soundscapeRecommendation.reason}
+        </p>
       </header>
 
       <div className="dashboard-grid">
-        <motion.div variants={itemVariants} className="glass-card span-2" style={{ background: 'linear-gradient(135deg, rgba(123, 97, 255, 0.2), rgba(0, 0, 0, 0.4))' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-             <h2>AI 사운드스케이프 플레이어</h2>
-             <div style={{ display: 'flex', gap: '8px' }}>
-                <div style={{ padding: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '50%' }}>
-                   <Music size={16} color="var(--primary)" />
-                </div>
-             </div>
-          </div>
-          
-          <div style={{ display: 'flex', gap: '40px', marginTop: '24px', position: 'relative' }}>
-             <div style={{ width: '240px', height: '200px', borderRadius: '24px', overflow: 'hidden', position: 'relative' }}>
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, var(--background), transparent)' }}></div>
-                <div style={{ position: 'absolute', bottom: '20px', left: '20px' }}>
-                   <p style={{ fontSize: '0.8rem', color: 'var(--primary)', fontWeight: 600 }}>Now Mixing</p>
-                   <p style={{ fontSize: '1.2rem', fontWeight: 700 }}>깊은 숲속의 장작</p>
-                </div>
-                {/* Simulated Waveform or Viz */}
-                <div style={{ display: 'flex', alignItems: 'flex-end', gap: '4px', height: '40px', position: 'absolute', right: '20px', bottom: '20px' }}>
-                   {[0.4, 0.8, 0.6, 0.9, 0.5, 0.7].map((h, i) => (
-                      <motion.div 
-                         key={i}
-                         animate={{ height: isPlaying ? [h*30, h*10, h*40, h*20] : 10 }}
-                         transition={{ repeat: Infinity, duration: 1 + i*0.2, ease: "easeInOut" }}
-                         style={{ width: '4px', background: 'var(--accent)', borderRadius: '2px' }}
-                      ></motion.div>
-                   ))}
-                </div>
-             </div>
-             
-             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '24px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '32px' }}>
-                   <button style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}><Rewind size={24} /></button>
-                   <button 
-                      onClick={() => setIsPlaying(!isPlaying)}
-                      style={{ 
-                         width: '72px', height: '72px', borderRadius: '50%', background: 'var(--primary)', 
-                         color: 'white', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                         boxShadow: '0 0 20px rgba(123, 97, 255, 0.5)'
-                      }}
-                   >
-                      {isPlaying ? <Pause size={32} /> : <Play size={32} style={{ marginLeft: '4px' }} />}
-                   </button>
-                   <button style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}><FastForward size={24} /></button>
-                </div>
-                
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                   <Volume2 size={20} color="var(--muted)" />
-                   <div style={{ flex: 1, height: '6px', background: 'rgba(255,255,255,0.1)', borderRadius: '3px', position: 'relative' }}>
-                      <div style={{ width: `${volume}%`, height: '100%', background: 'var(--primary)', borderRadius: '3px' }}></div>
-                      <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: 'white', position: 'absolute', top: '-3px', left: `${volume}%`, transform: 'translateX(-50%)', cursor: 'pointer' }}></div>
-                   </div>
-                   <span style={{ fontSize: '0.8rem', width: '30px' }}>{volume}%</span>
-                </div>
-             </div>
-          </div>
-          
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginTop: '32px' }}>
-             {soundscapes.map((s, i) => (
-                <div key={i} className="glass" style={{ padding: '16px', border: 'none', background: 'rgba(255,255,255,0.03)', cursor: 'pointer', transition: 'all 0.2s' }}>
-                   <p style={{ fontSize: '0.7rem', color: 'var(--primary)', fontWeight: 600 }}>{s.type}</p>
-                   <p style={{ fontSize: '0.85rem', fontWeight: 600, margin: '4px 0' }}>{s.title}</p>
-                   <p style={{ fontSize: '0.7rem', color: 'var(--muted)' }}>{s.duration}</p>
-                </div>
-             ))}
-          </div>
-        </motion.div>
+        <SoundPlayer 
+          currentTrack={currentTrack} 
+          trackList={soundscapes} 
+          onTrackSelect={setCurrentTrack} 
+        />
 
         <motion.div variants={itemVariants} className="glass-card">
           <h2>적정 취침 시간</h2>
@@ -116,7 +60,7 @@ export default function Recommendation() {
              </div>
              
              <div style={{ borderTop: '1px solid var(--border)', paddingTop: '20px' }}>
-                <p style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: '12px' }}>추천 취침 시작</p>
+                <p style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: '12px' }}>추천 취침 시작 ({recommendations.alarmRecommendation.time})</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', borderRadius: '12px', background: 'rgba(123, 97, 255, 0.1)' }}>
                       <span style={{ fontSize: '0.9rem' }}>5 사이클 (최적)</span>
@@ -127,7 +71,7 @@ export default function Recommendation() {
                       <span style={{ fontWeight: 600 }}>PM 10:00</span>
                    </div>
                 </div>
-                <p style={{ fontSize: '0.75rem', color: 'var(--muted)', marginTop: '12px' }}>* 수면 사이클 90분 단위를 고려했습니다.</p>
+                <p style={{ fontSize: '0.75rem', color: 'var(--muted)', marginTop: '12px' }}>* {recommendations.alarmRecommendation.reason}</p>
              </div>
           </div>
         </motion.div>

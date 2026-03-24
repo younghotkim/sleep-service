@@ -1,9 +1,19 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Coffee, Activity, Moon, Clock, ChevronRight, Zap, Target, Star } from 'lucide-react';
+import { Coffee, Activity, Moon, Zap, Star } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { getTonightRecommendations } from '@/utils/recommendationEngine';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
+  const router = useRouter();
+  const [recommendations, setRecommendations] = useState<any>(null);
+
+  useEffect(() => {
+    setRecommendations(getTonightRecommendations());
+  }, []);
+
   const containerVariants = {
     hidden: { opacity: 0 },
     show: {
@@ -109,25 +119,29 @@ export default function Home() {
 
         <motion.div variants={itemVariants} className="glass-card span-2">
           <h2>오늘 밤 추천 솔루션</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-            <div className="glass" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px', border: 'none', background: 'rgba(255,255,255,0.02)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                 <Moon size={20} color="var(--primary)" />
-                 <span style={{ fontWeight: 600 }}>90분 수면 사이클 알람</span>
-              </div>
-              <p style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>내일 07:00 기상을 위해 밤 11:30에 잠드시는 것을 추천해요.</p>
-              <button className="btn btn-secondary" style={{ padding: '8px', fontSize: '0.8rem' }}>알람 설정하기</button>
-            </div>
-            
-            <div className="glass" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px', border: 'none', background: 'rgba(255,255,255,0.02)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                 <Zap size={20} color="var(--accent)" />
-                 <span style={{ fontWeight: 600 }}>AI 사운드스케이프</span>
-              </div>
-              <p style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>오늘의 피로도를 분석한 결과, '깊은 숲속 장작 소리'를 추천합니다.</p>
-              <button className="btn btn-secondary" style={{ padding: '8px', fontSize: '0.8rem' }}>재생하기</button>
-            </div>
-          </div>
+          {recommendations ? (
+             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+               <div className="glass" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px', border: 'none', background: 'rgba(255,255,255,0.02)' }}>
+                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <Moon size={20} color="var(--primary)" />
+                    <span style={{ fontWeight: 600 }}>90분 수면 사이클 알람</span>
+                 </div>
+                 <p style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>{recommendations.alarmRecommendation.reason}</p>
+                 <button className="btn btn-secondary" style={{ padding: '8px', fontSize: '0.8rem' }}>{recommendations.alarmRecommendation.time} 알람 설정하기</button>
+               </div>
+               
+               <div className="glass" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px', border: 'none', background: 'rgba(255,255,255,0.02)' }}>
+                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <Zap size={20} color="var(--accent)" />
+                    <span style={{ fontWeight: 600 }}>AI 사운드스케이프</span>
+                 </div>
+                 <p style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>{recommendations.soundscapeRecommendation.reason}</p>
+                 <button className="btn btn-secondary" onClick={() => router.push('/recommendation')} style={{ padding: '8px', fontSize: '0.8rem' }}>'{recommendations.soundscapeRecommendation.sound.title}' 재생하기</button>
+               </div>
+             </div>
+          ) : (
+             <p>분석 중...</p>
+          )}
         </motion.div>
       </section>
 
